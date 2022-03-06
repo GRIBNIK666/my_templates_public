@@ -1,0 +1,64 @@
+--primary process inside container has pid 1
+fs: union fs
+>> presents multiple "fs" as "union mount" (consists of layers(diff fs))
+overlay2 is docker storage driver
+	>> base layer(root)
+	>> overlay layer(rw layer)
+	>> diff layer (saves changes to base layer)
+copy-on-write:(concept)
+if base layer changes then overlay layer applies changes from diff layer
+--network
+@in docker-compose.yml@
+ ---
+ services: 
+   <service-name>: ((service hostname))
+ ---
+is accessible by
+  <protocol>://<service-name>
+inside docker network
+###DOCKER NETWORK DRIVERS:
+1.Bridge (default)
+  Bridge networks are usually used when your applications run in standalone containers that need to communicate.
+  Example:
+    For every running container you have assigned local IP address:
+    ((Docker Network Adapter CIDR 172.17.0.0/x))
+    172.17.0.2:80 "nginx container"
+    172.17.0.4:8081 "httpd container"
+    Can be accessed from host using internal port.
+2.Host
+  Removes network isolation between the container and the docker host, and uses the host's networking directly, won't need port forwarding and publishing.
+    Example:
+      <node-ip>:<container port> 90.0.1.30:80
+  You won't be able to run 2 containers that occupy the same port.
+3.None
+  Container doesn't interact with any network. Often used with custom network driver.
+4.Overlay
+  Overlay networks connect multiple Docker hosts together and enable swarm services to communicate with each of Docker hosts.
+    Example:
+      <node1> *.*.0.1
+        172.17.0.2:80 "nginx container"
+        172.17.0.3:80 "nginx container"
+      <node2> *.*.0.2
+        172.17.0.2:3306 "mysql container"
+        172.17.0.3:6379 "redis container"
+      <node3> *.*.0.3
+        172.17.0.2:80 "nginx container"
+        172.17.0.3:80 "nginx container"
+      What we've got for better picture:
+     1. 172.17.0.3:80 "nginx container" (running on <node1>)
+        172.17.0.3:6379 "redis container" (running on <node2)
+        172.17.0.3:80 "nginx container" (running on <node3>)
+    --
+     2. 172.17.0.2:80 "nginx container" (running on <node1>)
+        172.17.0.2:3306 "mysql container" (running on <node2>)
+        172.17.0.2:80 "nginx container" (running on <node3>)
+  BUT 172.17.0.2 and 172.17.0.3 can't talk by default unless you configure routing and publish ports.
+  You can attach new containers in Swarm cluster to existing Overlay network.
+5.Macvlan
+  Macvlan networks allow you to assign a MAC address to a container, making it appear as a physical device on your network. The Docker daemon routes traffic to containers by their MAC addresses.
+    Example: 
+      192.168.0.4:80 "nginx container" (:eth0 adapter) running on <node1>
+      connected via >> macvlan adapter to <node1> 192.168.0.2
+      connected to  >> L2/L3 Physical Network (Adapter/AP) (Gateway 192.168.0.1)
+#Creating NETWORK guide
+#go to docker_MANAGE_NETWORK.sh

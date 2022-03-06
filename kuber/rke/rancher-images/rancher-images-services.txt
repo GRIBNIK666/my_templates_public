@@ -1,0 +1,49 @@
+src: https://github.com/rancher/kontainer-driver-metadata/blob/master/rke/k8s_rke_system_images.go
+---
+#######################################################################################################
+ACTUAL v2.6.3 template
+#######################################################################################################
+system_images:
+    etcd: 90.0.1.77:5000/rancher/mirrored-coreos-etcd:v3.4.16-rancher1
+    alpine: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+    nginx_proxy: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+    cert_downloader: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+    kubernetes_services_sidecar: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+    kubedns: 90.0.1.77:5000/rancher/mirrored-k8s-dns-kube-dns:1.17.4
+    dnsmasq: 90.0.1.77:5000/rancher/mirrored-k8s-dns-dnsmasq-nanny:1.17.4
+    kubedns_sidecar: 90.0.1.77:5000/rancher/mirrored-k8s-dns-sidecar:1.17.4
+    kubedns_autoscaler: 90.0.1.77:5000/rancher/mirrored-cluster-proportional-autoscaler:1.8.3
+    coredns: 90.0.1.77:5000/rancher/mirrored-coredns-coredns:1.8.4
+    coredns_autoscaler: 90.0.1.77:5000/rancher/mirrored-cluster-proportional-autoscaler:1.8.3
+    nodelocal: 90.0.1.77:5000/rancher/mirrored-k8s-dns-node-cache:1.18.0
+    kubernetes: 90.0.1.77:5000/rancher/hyperkube:v1.22.4-rancher1
+    flannel: 90.0.1.77:5000/rancher/mirrored-coreos-flannel:v0.15.1
+    flannel_cni: 90.0.1.77:5000/rancher/flannel-cni:v0.3.0-rancher6
+    calico_node: 90.0.1.77:5000/rancher/mirrored-calico-node:v3.19.2
+    calico_cni: 90.0.1.77:5000/rancher/mirrored-calico-cni:v3.19.2
+    calico_controllers: 90.0.1.77:5000/rancher/mirrored-calico-kube-controllers:v3.19.2
+    calico_ctl: 90.0.1.77:5000/rancher/mirrored-calico-ctl:v3.19.2
+    calico_flexvol: 90.0.1.77:5000/rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2
+    canal_node: 90.0.1.77:5000/rancher/mirrored-calico-node:v3.19.2
+    canal_cni: 90.0.1.77:5000/rancher/mirrored-calico-cni:v3.19.2
+    canal_controllers: 90.0.1.77:5000/rancher/mirrored-calico-kube-controllers:v3.19.2
+    canal_flannel: 90.0.1.77:5000/rancher/mirrored-coreos-flannel:v0.15.1
+    canal_flexvol: 90.0.1.77:5000/rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2
+    weave_node: 90.0.1.77:5000/weaveworks/weave-kube:2.8.1
+    weave_cni: 90.0.1.77:5000/weaveworks/weave-npc:2.8.1
+    pod_infra_container: 90.0.1.77:5000/rancher/mirrored-pause:3.4.1
+    ingress: 90.0.1.77:5000/rancher/nginx-ingress-controller:nginx-0.49.3-rancher1
+    ingress_backend: 90.0.1.77:5000/rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1
+    ingress_webhook: 90.0.1.77:5000/rancher/mirrored-ingress-nginx-kube-webhook-certgen:v1.1.1
+    metrics_server: 90.0.1.77:5000/rancher/mirrored-metrics-server:v0.5.0
+    aci_cni_deploy_container: 90.0.1.77:5000/noiro/cnideploy:5.1.1.0.1ae238a
+    aci_host_container: 90.0.1.77:5000/noiro/aci-containers-host:5.1.1.0.1ae238a
+    aci_opflex_container: 90.0.1.77:5000/noiro/opflex:5.1.1.0.1ae238a
+    aci_mcast_container: 90.0.1.77:5000/noiro/opflex:5.1.1.0.1ae238a
+    aci_ovs_container: 90.0.1.77:5000/noiro/openvswitch:5.1.1.0.1ae238a
+    aci_controller_container: 90.0.1.77:5000/noiro/aci-containers-controller:5.1.1.0.1ae238a
+    aci_gbp_server_container: 90.0.1.77:5000/noiro/gbp-server:5.1.1.0.1ae238a
+    aci_opflex_server_container: 90.0.1.77:5000/noiro/opflex-server:5.1.1.0.1ae238a
+#######################################################################################################
+ACTUAL
+#######################################################################################################

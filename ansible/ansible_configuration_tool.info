@@ -1,0 +1,60 @@
+#Ansible Pull Configuration Tool
+Pull configuration:
+Nodes check with the server periodically and fetch the configurations from it.
+	#Requires client to be installed on each work-node in order
+	#to fetch up-to-date configuration from master-node.
+#
+#Ansible Push Configuration Tool
+Push configuration:
+	Server pushes configuration to the nodes.
+#Doesn't require client to be installed on work-node. 
+#You force installation from master-node by pushing configuration via SSH to worker-nodes.
+Arch:
+	[CMDB] #configuration manager repository
+	[LOCAL MACHINE] master-node:
+		1) - Playbooks: #collection of configuration code files
+				- Modules; #tasks involve ansible modules
+				- APIs; (python api)
+				- Plugins; 
+					#example: 1) Action plugin
+					(actions executed on work-node before executing playbook scenario)
+							  2) Connection plugin
+					(allow to connect to docker containers)
+		2) - Inventory; #client groups including ssh access
+					: - workerNode1
+					  - workerNode2
+					  - workerNode3
+	}
+IRL "Ansible Push" is more widespead.
+##
+Playbooks:
+	Playbooks are .yaml files, that can declare configurations and manage manual ordered processes & launch tasks synced or asynced.
+Playbook structure:
+#
+---
+	hosts
+		[list]
+	variables
+		[list]
+	tasks
+		[list]
+	handlers
+		[list]
+#
+"handlers" are "tasks" executed under condition, achieved during specific "task" executing
+##sample5.yml
+############
+---
+- hosts: webservers #client group
+  tasks: 
+    - name: install apache2 #task name
+      apt: name=apache2 update_cache=yes state=latest 
+      #using "apt" module 
+
+    notify:
+      - restart apache2 # call handler by name
+
+  handlers:
+    - name: restart apache2 #handler name
+      service: name=apache2 state=restarted #restart service apache2
+############

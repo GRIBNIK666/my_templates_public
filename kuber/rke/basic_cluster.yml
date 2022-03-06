@@ -1,0 +1,86 @@
+#basic_cluster.yml
+# If you intended to deploy Kubernetes in an air-gapped environment,
+# please consult the documentation on how to configure custom RKE images.
+nodes:
+- address: 90.0.1.70
+  port: "22"
+  role:
+  - controlplane
+  - etcd
+  user: root
+  docker_socket: /var/run/docker.sock
+  ssh_key_path: ~/.ssh/id_rsa
+- address: 90.0.1.71
+  port: "22"
+  role:
+  - worker
+  - etcd
+  user: root
+  docker_socket: /var/run/docker.sock
+  ssh_key_path: ~/.ssh/id_rsa
+- address: 90.0.1.72
+  port: "22"
+  role:
+  - worker
+  - etcd
+  user: root
+  docker_socket: /var/run/docker.sock
+  ssh_key_path: ~/.ssh/id_rsa
+services:
+  etcd:
+    snapshot: null
+    retention: 24h
+    creation: 6h
+network:
+  plugin: flannel
+authentication:
+  strategy: x509
+  sans: []
+  webhook: null
+system_images:
+  etcd: 90.0.1.77:5000/rancher/mirrored-coreos-etcd:v3.4.16-rancher1
+  alpine: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+  nginx_proxy: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+  cert_downloader: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+  kubernetes_services_sidecar: 90.0.1.77:5000/rancher/rke-tools:v0.1.78
+  kubedns: 90.0.1.77:5000/rancher/mirrored-k8s-dns-kube-dns:1.17.4
+  dnsmasq: 90.0.1.77:5000/rancher/mirrored-k8s-dns-dnsmasq-nanny:1.17.4
+  kubedns_sidecar: 90.0.1.77:5000/rancher/mirrored-k8s-dns-sidecar:1.17.4
+  kubedns_autoscaler: 90.0.1.77:5000/rancher/mirrored-cluster-proportional-autoscaler:1.8.3
+  coredns: 90.0.1.77:5000/rancher/mirrored-coredns-coredns:1.8.4
+  coredns_autoscaler: 90.0.1.77:5000/rancher/mirrored-cluster-proportional-autoscaler:1.8.3
+  nodelocal: 90.0.1.77:5000/rancher/mirrored-k8s-dns-node-cache:1.18.0
+  kubernetes: 90.0.1.77:5000/rancher/hyperkube:v1.21.5-rancher1
+  flannel: 90.0.1.77:5000/rancher/mirrored-coreos-flannel:v0.14.0
+  flannel_cni: 90.0.1.77:5000/rancher/flannel-cni:v0.3.0-rancher6
+  calico_node: 90.0.1.77:5000/rancher/mirrored-calico-node:v3.19.2
+  calico_cni: 90.0.1.77:5000/rancher/mirrored-calico-cni:v3.19.2
+  calico_controllers: 90.0.1.77:5000/rancher/mirrored-calico-kube-controllers:v3.19.2
+  calico_ctl: 90.0.1.77:5000/rancher/mirrored-calico-ctl:v3.19.2
+  calico_flexvol: 90.0.1.77:5000/rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2
+  canal_node: 90.0.1.77:5000/rancher/mirrored-calico-node:v3.19.2
+  canal_cni: 90.0.1.77:5000/rancher/mirrored-calico-cni:v3.19.2
+  canal_controllers: 90.0.1.77:5000/rancher/mirrored-calico-kube-controllers:v3.19.2
+  canal_flannel: 90.0.1.77:5000/rancher/mirrored-coreos-flannel:v0.14.0
+  canal_flexvol: 90.0.1.77:5000/rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2
+  weave_node: 90.0.1.77:5000/weaveworks/weave-kube:2.8.1
+  weave_cni: 90.0.1.77:5000/weaveworks/weave-npc:2.8.1
+  pod_infra_container: 90.0.1.77:5000/rancher/mirrored-pause:3.4.1
+  ingress: 90.0.1.77:5000/rancher/nginx-ingress-controller:nginx-0.48.1-rancher1
+  ingress_backend: 90.0.1.77:5000/rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1
+  ingress_webhook: 90.0.1.77:5000/rancher/mirrored-jettech-kube-webhook-certgen:v1.5.1
+  metrics_server: 90.0.1.77:5000/rancher/mirrored-metrics-server:v0.5.0
+  windows_pod_infra_container: 90.0.1.77:5000/rancher/kubelet-pause:v0.1.6
+ssh_key_path: ~/.ssh/id_rsa
+ssh_agent_auth: false
+authorization:
+  mode: none
+  options: {}
+enable_cri_dockerd: null
+private_registries:
+  - url: 90.0.1.77:5000
+    user: root
+    password: root
+    is_default: true 
+ingress:
+  provider: nginx

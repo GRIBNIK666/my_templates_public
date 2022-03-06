@@ -1,0 +1,1 @@
+sudo sshfs -d root@90.0.1.1:/home/distrib/gitlab_workdir /mnt/distrib/gitlab_workdir -o allow_other -o nonempty

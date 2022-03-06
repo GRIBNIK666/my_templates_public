@@ -1,0 +1,10 @@
+#ansible_inventory.info
+vi /etc/ansible/hosts 
+#
+[webserver] #client group
+web1.machine #hostname/ip
+web2.machine
+web3.machine
+
+[databaseserver]
+db1.machine

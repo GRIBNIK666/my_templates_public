@@ -1,0 +1,18 @@
+Dockerfile.info
+FROM centos:latest
+RUN yum install -y firewalld dnf-plugins-core
+RUN bash -c "yum config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo"
+RUN bash -c "yum install -y containerd.io docker-ce"
+RUN mkdir /home/install && chmod 775 /home/install
+        #RUN systemctl enable docker && systemctl start docker
+COPY ./install /home/install
+WORKDIR /home
+        #ENTRYPOINT ["~ && pwd && systemctl status docker"]
+ENTRYPOINT ["~ && pwd && /bin/sh"]
+        #CMD ["-c", "5", "90.0.1.2"]
+ENV HOSTNAME centos8.mydomain.local
+EXPOSE 2222
+MAINTAINER gribnik666
+USER 0
+VOLUME ["/opt/centos8_docker", "/home"]
+VOLUME ["/root/Documents"]

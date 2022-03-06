@@ -1,0 +1,8 @@
+#base_cluster.yml (rename to cluster.yml)
+nodes:
+    - address: 1.2.3.4
+      user: ubuntu
+      role:
+        - controlplane
+        - etcd
+        - worker

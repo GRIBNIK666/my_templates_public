@@ -1,0 +1,526 @@
+##sample.yml
+############
+---
+- name: sample book #playbook name
+  hosts: ansible_client #server group from /etc/ansible/hosts
+  remote_user: root #used to log in to client
+  become: true #need to be root to execute playbook
+  tasks: #playbook actions
+   - name: install httpd #action title
+     yum: 
+       name: httpd
+       state: latest
+   - name: run httpd
+     service: 
+       name: httpd 
+       state: started
+   - name: create webpage
+     copy: 
+      content: "Test"
+      dest: /var/www/html/index.html
+##sample2.yml
+############
+---
+- name: play1
+  hosts: webserver 
+  tasks: 
+    - name: install apache
+      yum:
+        name: apache 
+        state: present 
+    - name: start apache
+      service:
+        name: apache
+        state: start
+##sample3.yml
+############
+---
+- name: play2
+  hosts: databaseserver 
+  tasks: 
+    - name: install MYSQL
+      yum: 
+        name: MYSQL
+        state: present 
+##sample4.yml (2 plays)
+############
+---
+- name: play1
+  hosts: webserver #server group from /etc/ansible/hosts
+  tasks: 
+    - name: install apache
+      yum:
+        name: apache 
+        state: present 
+    - name: start apache
+      service:
+        name: apache
+        state: start
+- name: play2
+  hosts: databaseserver #server group from /etc/ansible/hosts
+  tasks: 
+    - name: install MYSQL
+      yum: 
+        name: MYSQL
+        state: present
+##sample5.yml
+############
+---
+- name: play5
+  hosts: webservers
+  tasks: 
+   - name: install apache2
+     apt: name=apache2 update_cache=yes state=latest 
+     notify: 
+      - restart apache2 
+  handlers: 
+   - name: restart apache2 
+     service: name=apache2 state=restarted
+##sample5-2.yml
+############
+---
+- name: play5
+  hosts: webservers
+  tasks: 
+   - name: install apache2
+     apt:
+       name: apache2 
+       update_cache: yes 
+       state: latest 
+     notify: 
+      - restart apache2 
+  handlers: 
+   - name: restart apache2 
+     service: 
+       name: apache2 
+       state: restarted
+##lampstack.yml
+############
+---
+- name: install apache & php & mysql
+  hosts: test-servers
+  become: true
+  become_user: root
+  gather_facts: true
+  tasks: 
+     - name: "install apache2"
+       package: name=apache2 state=present
+     - name: "install apach2-php5"
+       package: name=libapache2-mod-php state=present
+     - name: "install php-cli"
+       package: name=php-cli state=present
+     - name: "install php-mcrypt"
+       package: name=php-mcrypt state=present
+     - name: "install php-gd"
+       package: name=php-gd state=present
+     - name: "install php-mysql"
+       package: name=php-mysql state=present
+     - name: "install mysql server"
+       package: name=mysql-server state=present
+#
+##mysqlmodule.yml
+---
+- hosts: all 
+  remote_user: root
+
+  tasks:
+   - name: install "pip"
+     apt: name=python-pip state=present
+   - name: install "libmysqlclient-dev"
+     apt: name=libmysqlclient-dev state=present
+   - name: install the Python MySQLB module
+     pip: name=MySQL-python
+   - name: Create database user edureka 
+     mysql_user: user=edureka password=edureka priv=*.*:ALL state=present
+   - name: Create database edu
+     mysql_db: db=edu state=present
+   - name: Create a Table reg
+     command: mysql -u edureka -pedureka -e 'CREATE TABLE reg (name varchar(30), email(varchar(30));' edu
+#
+##deploywebsite.yml
+---
+- name: copy play
+  hosts: test-servers
+  become: true
+  become_user: root
+  gather_facts: true
+  tasks: 
+     - name: "copy file"
+       copy: src=/home/root/Documents/index.html dest=/var/www/html/index.html
+     - name: "copy file"
+       copy: src=/home/root/Documents/process.php dest=/var/www/html/process.php
+     - name: "copy file"
+       copy: src=/home/root/Documents/result.php dest=/var/www/html/result.php 
+#
+##worker_dependecies1.yml
+---
+- name: install dependecies
+  hosts: test-servers
+  remote_user: root
+  tasks:
+    - name: install docker
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+    - name: install python package manager
+      yum:
+        name: python3-pip
+        state: present
+    - name: install python sdk
+      become_user: root
+      pip:
+        name:
+          - docker
+          - docker-compose
+#
+##install_portainer.yml
+--- 
+- hosts: test-servers
+  tasks: 
+    - name: Deploy Portainer 
+      community.docker.docker_container: 
+        name: portainer
+        image: portainer/portainer-ce
+        ports:
+          - "9000:9000"
+          - "8000:8000" 
+        volumes: 
+          - /var/run/docker.sock:/var/run/docker.sock 
+          - /portainer_data:/data
+        restart_policy: always
+#
+##deploy_watchtower.yml
+--- 
+- hosts: test-servers
+  tasks: 
+    - name: Deploy Watchtower 
+      community.docker.docker_container: 
+        name: watchtower
+        image: containrrr/watchtower
+        command: --schedule "0 0 4 * * *"
+        volumes: 
+          - /var/run/docker.sock:/var/run/docker.sock 
+        restart_policy: always
+#
+##install_wordpress.yml
+--- 
+- hosts: test-servers
+  tasks: 
+    - name: Create network 
+      community.docker.docker_network: 
+        name: wordpress
+
+    - name: Deploy Wordpress
+      community.docker.docker_container: 
+        name: wordpress
+        image: wordpress:latest
+        ports:
+          - "80:80"
+        networks:
+          - name: wordpress 
+        volumes: 
+          - wordpress:/var/www/html
+        env: 
+          WORDPRESS_DB_HOST: mysql
+          WORDPRESS_DB_NAME: wp
+          WORDPRESS_DB_USER: wp
+          WORDPRESS_DB_PASSWORD: wp_pass
+        restart_policy: always 
+
+    - name: Deploy mysql 
+      community.docker.docker_container:
+        name: wp
+        image: mysql:5.7
+        networks:
+          - name: wordpress
+        volumes:
+          - wp:/var/lib/mysql
+        env:
+          MYSQL_USER: wp
+          MYSQL_PASSWORD: wp_pass
+          MYSQL_DATABASE: wp
+          MYSQL_ROOT_PASSWORD: root
+        restart_policy: always
+
+    - name: Deploy phpmyadmin
+      community.docker.docker_container: 
+        name: phpmyadmin
+        image: phpmyadmin:latest
+        ports: 
+          - "8080:80"
+        env: 
+          PMA_HOST: mysql
+#
+##playbook101.yml
+---
+- hosts: test1
+  become_user: root
+  tasks:
+    - name: Ensure service is installed.
+      yum: name=firewalld state=present
+    - command: docker version
+    - shell: | #multiline scaler
+        if ! rpm -qa |grep -qw firewalld; then
+           yum install -y firewalld
+    - name: Ensure service is running
+      service: name=firewalld state=started enable=yes
+#
+##playbook101-3.yml #wrong way
+---
+- name: Install Apache
+  hosts: app
+
+  tasks:
+    - name: Install Apache 
+      command: yum install --quiet -y httpd httpd-devel
+    - name: Copy configuration files.
+      command: > #folded scaler
+       cp httpd.conf /etc/httpd/conf/httpd.conf 
+    - command: >
+       cp httpd-vhosts /etc/httpd/conf/httpd-vhosts.conf 
+    - name: Start Apache and configure it to run at boot. 
+      command: service httpd start 
+    - command: chkconfig httpd on 
+#
+##playbook101-3.yml #shell way
+---
+- name: Install Apache
+  hosts: app
+
+  tasks:
+    - name: Install Apache 
+      command: yum install --quiet -y httpd httpd-devel
+    - name: Copy configuration files.
+      command: > #folded scaler
+       cp httpd.conf /etc/httpd/conf/httpd.conf 
+    - command: >
+       cp httpd-vhosts /etc/httpd/conf/httpd-vhosts.conf 
+    - name: Start Apache and configure it to run at boot. 
+      command: service httpd start 
+    - command: chkconfig httpd on 
+#
+##playbook101-3-2.yml #module way
+#using Ansible with Ginger
+  #copying multiple files using loop
+  touch httpd.conf
+  touch httpd-vhosts.conf
+#https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_module.html#examples
+---
+- name: Install Apache
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Install Apache 
+      yum: 
+        name:
+          - httpd
+          - httpd-devel
+        state: present 
+    - name: Copy configuration files.
+      copy: 
+       src: "{{ item.src }}"  #item 1 variable
+       dest: "{{ item.dest }}" #item 2 variable
+       owner: root
+       group: root
+       mode: 0644
+      with_items:
+        - src: httpd.conf
+          dest: /etc/httpd/conf/httpd.conf 
+        - src: httpd-vhosts.conf
+          dest: /etc/httpd/conf/httpd-vhosts.conf 
+    - name: Ensure Apache is started now and on boot.
+      service: 
+        name: httpd
+        state: started 
+        enabled: true #suits also: <1>, <yes>
+#
+##vars.yml
+---
+download_dir: /tmp 
+solr_dir: /opt/solr 
+solr_version: 8.9.0
+solr_checksum: sha512:114b2e1c4bab2bdc71fb9050c4fc038b93c9e92bb304c7e9e4d1502ceec449b84d3d8c53833480e0ab50f463279c05773282f63f12b4503bb453a017ccfa3f60
+#
+##main.yml
+  #ansible-doc get_url
+  #https://docs.ansible.com/ansible/latest/collections/ansible/builtin/get_url_module.html
+---
+  - hosts: solr
+    become: true
+
+    vars_files:
+      - vars.yml
+
+    pre_tasks:
+      - name: Update packages
+        yum: name="*" state=latest
+
+    handlers:
+      - name: restart solr
+        service: name=solr state=restared
+
+    tasks:
+      - name: Install Java.
+        yum: name=java-1.8.0-openjdk state=present
+
+      - name: Download Solr.
+        get_url:
+         # download from URL
+          url: "https://downloads.apache.org/lucene/solr/{{ solr_version }}/solr-{{ solr_version }}-src.tgz"
+         # download from to dir configured in vars.yml
+          dest: "{{ download_dir }}/solr-{{ solr_version }}.tgz"
+         # verify checksum in vars.yml
+          checksum: "{{ solr_checksum }}"
+
+      - name: Extract Solr.
+        unarchive:
+        # define which file to extract
+          src: "{{ download_dir }}/solr-{{ solr_version }}.tgz"
+        # define where to extract
+          dest: "{{ download_dir }}"
+        # unpack an archive which already exists is "dest" for checksum validation
+          remote_src: true
+        # define which file can be present, if exists then abort task, cause it's already done
+          creates: "{{ download_dir }}/solr-{{ solr_version }}/README.txt"
+
+      - name: Set permission for solr installer.
+        command: chmod 775 {{ download_dir }}/solr-{{ solr_version }}/solr/bin/install_solr_service.sh
+
+      - name: Run Solr installation script.
+        command: >
+         {{ download_dir }}/solr-{{ solr_version }}.tgz
+         {{ download_dir }}/solr-{{ solr_version }}/solr/bin/install_solr_service.sh
+        # install .tgz file 
+         -i /opt
+        # solr data directory
+         -d /var/solr
+        # create user for solr
+         -u solr
+        # select servicename for solr
+         -s solr
+        # solr port
+         -p 8983
+         creates= {{ solr_dir }}/bin/solr
+      - name: Ensure solr is started and enabled on boot.
+        service: name=solr state=started enabled=yes
+#
+  #notify: restart solr
+#
+##clean main.yml
+# WIP 
+# fatal: [90.0.1.21]: FAILED! => {"changed": false, "cmd": "/tmp/solr-8.9.0.tgz /tmp/solr-8.9.0/solr/bin/install_solr_service.sh -i /opt -d /var/solr -u solr -s solr -p 8983 /opt/solr/bin/solr", "msg": "[Errno 13] Permission denied: b'/tmp/solr-8.9.0.tgz'", "rc": 13, "stderr": "", "stderr_lines": [], "stdout": "", "stdout_lines": []}
+---
+- hosts: solr
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Update packages
+      yum: name="*" state=latest
+
+  handlers:
+    - name: restart solr
+      service: name=solr state=restared
+
+  tasks:
+    - name: Install Java.
+      yum: name=java-1.8.0-openjdk state=present
+
+    - name: Download Solr.
+      get_url:
+        url: "https://downloads.apache.org/lucene/solr/{{ solr_version }}/solr-{{ solr_version }}-src.tgz"
+        dest: "{{ download_dir }}/solr-{{ solr_version }}.tgz"
+        checksum: "{{ solr_checksum }}"
+
+    - name: Extract Solr.
+      unarchive:
+        src: "{{ download_dir }}/solr-{{ solr_version }}.tgz"
+        dest: "{{ download_dir }}"
+        remote_src: true
+        creates: "{{ download_dir }}/solr-{{ solr_version }}/README.txt"
+
+    - name: Set permission for solr installer.
+      command: chmod 775 {{ download_dir }}/solr-{{ solr_version }}/solr/bin/install_solr_service.sh
+
+    - name: Run Solr installation script.
+      command: >
+        {{ download_dir }}/solr-{{ solr_version }}.tgz
+        {{ download_dir }}/solr-{{ solr_version }}/solr/bin/install_solr_service.sh
+        -i /opt
+        -d /var/solr
+        -u solr
+        -s solr
+        -p 8983
+        creates= {{ solr_dir }}/bin/solr
+    - name: Ensure solr is started and enabled on boot.
+      service: name=solr state=started enabled=yes
+#
+##ep4_apache_handler.yml
+---
+- name: Install Apache
+  hosts: apache-app
+  become: true
+
+  handlers:
+    - name: restart apache
+      service:
+        name: httpd
+        state: restarted
+      notify: restart memcached
+
+    - name: restart memcached
+      service:
+        name: memcached
+        state: restarted
+
+  tasks:
+    - name: Copy configuration files.
+      copy: 
+       src: files/test.conf
+       dest: /etc/httpd/conf.d/test.conf
+  #call handler if file changes
+      notify: 
+        # remove flush_handlers to execute both at the end of playbook
+        - restart apache
+        #- restart memcached 
+
+  #apply to immediately call handlers
+    - name: Ensure handlers are flushed immediately.
+      meta: flush_handlers 
+
+    - name: Ensure Apache is installed
+      yum: 
+        name: httpd
+        state: present 
+    - name: Ensure Apache is started now and on boot.
+      service: 
+        name: httpd
+        state: started 
+        enabled: true
+  # - fail:
+#
+##reg_uptime.yml
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Register the output of the 'uptime' command.
+      command: uptime
+      register: system_uptime
+    - name: Print the registered output of the 'uptime' command.
+      debug:
+        var: system_uptime.stdout
+    - name: Print a message if a command resulted in a change.
+      debug:
+        msg: "Command resulted in a change!"
+      when: system_uptime is changed
+#

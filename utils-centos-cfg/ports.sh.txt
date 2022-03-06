@@ -1,0 +1,10 @@
+#!/bin/sh
+#for docker
+firewall-cmd --add-port=2377/tcp --permanent && firewall-cmd --reload
+firewall-cmd --add-port=7946/tcp --permanent && firewall-cmd --reload
+firewall-cmd --add-port=7946/udp --permanent && firewall-cmd --reload
+firewall-cmd --add-port=4789/udp --permanent && firewall-cmd --reload
+firewall-cmd --add-port=50/esp --permanent && firewall-cmd --reload
+#nginx httpd default
+firewall-cmd --add-port=80/tcp --permanent && firewall-cmd --reload
+firewall-cmd --add-port=8080/tcp --permanent && firewall-cmd --reload
